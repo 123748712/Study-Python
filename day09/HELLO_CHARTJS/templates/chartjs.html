@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="../static/axios.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script type="text/javascript">
+	var labels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+	var s_names = [];
+// 	{% for name in s_names %} // python 데이터 가져오기
+// 		s_names.push('{{name.s_name}}');
+// 	{% endfor %}
+	var datas = [];
+	async function myinit() {
+		var str_table = "";
+		var str_tr = `
+			<tr>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+		</tr>
+		`; // ` ` => ` ` 사이에 있는 모든것을 담아준다. string 타입
+		var obj_mytable = document.getElementById("mytable");
+		for(var i = 0; i < 229; i++) {
+			str_table += str_tr;
+		}
+		obj_mytable.innerHTML = str_table;
+		
+		var res = await axios({
+	        method:"GET", // 넘겨줄 방식
+	        url: 'axios_snames', // 넘겨줄 url
+	        params: { // 넘겨줄 params
+				'col01' : 'a'
+	        }
+	    }); 
+		list = res.data.snames; // 이름 리스트
+	    for(var i =0; i < list.length; i++) {
+	    	s_names.push(list[i].s_name); // s_names 배열에 받아온 데이터 넣기
+	  	 }
+	    
+	    var plist = res.data.prices;
+	    for(var i =0; i < plist.length; i++) {
+	    	datas.push(plist[i]);
+	  	 }
+	    
+		for(var i = 0; i < s_names.length; i++) {
+		var context = document.getElementsByClassName('myChart')[i].getContext('2d'); /* 여러개의 태그를 가져오기 위해선 elements 사용 */
+		
+		var myChart = new Chart(context, {
+			type : 'line', // 차트의 형태
+			data : { // 차트에 들어갈 데이터
+				labels : labels, // x 축
+				datasets : [ {
+					label : s_names[i],
+					data : datas[i],
+					borderWidth : 1 // 경계선 굵기
+				} ]
+			}
+		});
+		}
+	}
+</script>
+</head>
+<body onload="myinit()"> <!-- 차트를 function으로 만든 후 onload에 기입 -->
+	<table border="1px" id="mytable">
+		<!-- <tr>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+			<td>
+				<canvas class="myChart"></canvas>
+			</td>
+		</tr> -->
+	</table>
+</body>
+</html>
