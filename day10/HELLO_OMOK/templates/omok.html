@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+table {
+	border-collapse: collapse;
+	line-height: 0;
+
+}
+td {
+	padding: 0;
+}
+/* img { */
+/* 	vertical-align: bottom; */
+/* } */
+</style>
+<script src="../static/axios.js"></script>
+<script src="../static/chart.min.js"></script>
+<script>
+
+// arr2d => 바둑알의 색에 따라 숫자를 변경
+// img2d => arr2d의 숫자에 따라 img 변경
+
+var arr2d = [
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0],
+    [0,0,0,0,0, 0,0,0,0,0]
+];
+
+var img2d = [];
+var flag_wb = true; // 흰돌이면 true, 흑돌이면 false
+var flag_ing = true;
+
+function myinit() {
+	var imgs = document.getElementsByTagName("img");
+	for(var i = 0; i < 10; i++) {
+		var line = [];
+		for(var j = 0; j < 10; j++) {
+			line.push(imgs[i*10+j]); // 0~99번째 방을 만들어 넣어줘야 함 (i * 10 + j, i => 십의자리 j => 일의자리)
+		}
+			img2d.push(line); // 한줄 만든 배열을 다시 배열에 넣어줘 2차원 배열 생성			
+	}
+	for(var i = 0; i < 10; i++) {
+		for(var j = 0; j < 10; j++) {
+			img2d[i][j].alt = i + ","+ j
+			img2d[i][j].onclick = myclick;
+			};
+		}
+	myrender();
+}
+
+function myrender() {
+	for(var i = 0; i < 10; i++) {
+		for(var j = 0; j < 10; j++) {
+			if(arr2d[i][j] == 0) {
+				img2d[i][j].src = "static/0.png";
+			}
+			if(arr2d[i][j] == 1) {
+				img2d[i][j].src = "static/1.png";
+			}
+			if(arr2d[i][j] == 2) {
+				img2d[i][j].src = "static/2.png";
+			}
+		}
+	}
+}
+
+function myclick(obj) {
+	if(!flag_ing) {
+		return;
+	}
+	var str_ij = obj.target.alt;
+	var arr_ij = str_ij.split(",");
+	i = parseInt(arr_ij[0]);
+	j = parseInt(arr_ij[1]);
+	
+	if(arr2d[i][j] > 0) {
+		return;
+	}
+	var stone = -1;
+	if(flag_wb) { // true면 흰돌
+		arr2d[i][j] = 1;
+		stone = 1;
+	} else {
+		arr2d[i][j] = 2;
+		stone = 2;
+	}
+
+	myrender();
+	
+	var up = checkUP(i, j, stone);
+	var dw = checkDW(i, j, stone);
+	var ri = checkRI(i, j, stone);
+	var le = checkLE(i, j, stone);
+	var ul = checkUL(i, j, stone);
+	var ur = checkUR(i, j, stone);
+	var dl = checkDL(i, j, stone);
+	var dr = checkDR(i, j, stone);
+	
+	var d1 = up + dw + 1;
+	var d2 = ri + le + 1;
+	var d3 = ul + dr + 1;
+	var d4 = ur + dl + 1;
+	
+	if(d1 == 5 || d2 == 5 || d3 == 5 || d4 == 5) {
+		if(flag_wb) {
+			setTimeout("alert('백돌 승리')", 1); // 시간을 지연시켜 돌이 놓아진 후 alert 발생
+		} else {
+			setTimeout("alert('흑돌 승리')", 1);
+		}
+		flag_ing = false;
+	}
+	flag_wb = !flag_wb
+}
+
+function checkUP(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i -= 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkDW(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i += 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkRI(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			j += 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkLE(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			j -= 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkUL(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i -= 1;
+			j -= 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkUR(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i -= 1;
+			j += 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkDR(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i += 1;
+			j += 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function checkDL(i, j, stone) {
+	var ret = 0;
+	try {
+		while(true) {
+			i += 1;
+			j -= 1;
+			if(arr2d[i][j] == stone) {
+				ret += 1;
+			} else {
+				return ret;
+			}
+		}
+	} catch(err) {
+		return ret;
+	}
+}
+
+function myreset() {
+	for(i = 0; i < 10; i++) {
+		for(j = 0; j < 10; j++) {
+			arr2d[i][j] = 0;
+		}
+	}
+	myrender();
+	flag_wb = true;
+	flag_ing = true;
+}
+</script>
+</head>
+<body onload="myinit()">
+	<table>
+		<tr>
+			<td><img src="static/0.png" onclick="myclick(this)"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>                          
+		<tr>                           
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+			<td><img src="static/0.png"></td>
+		</tr>
+	</table>
+	<input type="button" value="reset" onclick="myreset()">
+</body>
+</html>
